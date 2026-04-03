@@ -1,0 +1,319 @@
+#!/bin/bash
+
+declare -a board=(
+    "_" "_" "_"
+    "_" "_" "_"
+    "_" "_" "_"
+)
+declare selected_field=4
+declare player="X"
+declare winner=""
+declare additional_info=""
+
+start_game() {
+
+    check_winner() {
+
+        calculate_winner() {
+            for i in {0..2}; do
+                if [ "${board[$((i * 3))]}" != "_" ] && [ "${board[$((i * 3))]}" == "${board[$((i * 3 + 1))]}" ] && [ "${board[$((i * 3 + 1))]}" == "${board[$((i * 3 + 2))]}" ]; then
+                    winner="${board[$((i * 3))]}"
+                    return 0
+                fi
+            done
+
+            for i in {0..2}; do
+                if [ "${board[$i]}" != "_" ] && [ "${board[$i]}" == "${board[$((i + 3))]}" ] && [ "${board[$((i + 3))]}" == "${board[$((i + 6))]}" ]; then
+                    winner="${board[$i]}"
+                    return 0
+                fi
+            done
+
+            if [ "${board[0]}" != "_" ] && [ "${board[0]}" == "${board[4]}" ] && [ "${board[4]}" == "${board[8]}" ]; then
+                winner="${board[0]}"
+                return 0
+            fi
+            if [ "${board[2]}" != "_" ] && [ "${board[2]}" == "${board[4]}" ] && [ "${board[4]}" == "${board[6]}" ]; then
+                winner="${board[2]}"
+                return 0
+            fi
+
+            for i in {0..8}; do
+                if [ "${board[$i]}" == "_" ]; then
+                    return 1
+                fi
+            done   
+
+            winner="DRAW"
+            return 0
+        }
+
+        calculate_winner
+        if [ "$winner" == "X" ] || [ "$winner" == "O" ]; then
+            additional_info="Player $winner wins!\nPress 'q' to quit."
+            selected_field=-1
+        elif [ "$winner" == "DRAW" ]; then
+            additional_info="It's a draw!\nPress 'q' to quit."
+            selected_field=-1
+        fi
+        return 1
+    }
+
+    print_info() {
+        echo "Press 'wsad' to select a field"
+        echo "Press 'q' to quit"
+        echo "Press 'e' to confirm"
+        echo ""
+        echo ""
+        if [ "$winner" == "" ]; then
+            echo "Player ${player}'s turn"
+        else 
+            echo ""
+        fi
+        echo ""
+    }
+
+    print_board() {
+
+        print_row_separator() {
+            echo "-------------+-------------+-------------"
+        }
+
+        print_row() {
+            local -a letter_O=(
+                " ####### " 
+                "##     ##"
+                "##     ##"
+                "##     ##"
+                "##     ##"
+                "##     ##"
+                " ####### "
+            )
+            local -a letter_X=(
+                "##     ##"
+                " ##   ## "
+                "  ## ##  "
+                "   ###   "
+                "  ## ##  "
+                " ##   ## "
+                "##     ##"
+            )
+            local -a letter_empty=(
+                "         "
+                "         "
+                "         "
+                "         "
+                "         "
+                "         "
+                "         "
+            )
+
+            local empty_cell="             "
+            local selected_cell_outer="*************"
+            local selected_cell_inner="*           *"
+            local selected_id="-1"
+
+            if [ "$#" -eq 4 ]; then
+                selected_id=$4
+            fi
+
+            local first_row=""
+            local second_row=""
+            if [ "$selected_id" -eq "-1" ]; then
+                first_row+="$empty_cell|$empty_cell|$empty_cell"
+                second_row+="$empty_cell|$empty_cell|$empty_cell"
+            elif [ "$selected_id" -eq "0" ]; then
+                first_row+="$selected_cell_outer|$empty_cell|$empty_cell"
+                second_row+="$selected_cell_inner|$empty_cell|$empty_cell"
+            elif [ "$selected_id" -eq "1" ]; then
+                first_row+="$empty_cell|$selected_cell_outer|$empty_cell"
+                second_row+="$empty_cell|$selected_cell_inner|$empty_cell"
+            elif [ "$selected_id" -eq "2" ]; then
+                first_row+="$empty_cell|$empty_cell|$selected_cell_outer"
+                second_row+="$empty_cell|$empty_cell|$selected_cell_inner"
+            fi
+
+            local -a first_letter=()
+            local -a second_letter=()
+            local -a third_letter=()
+
+            if [ "$1" == "O" ]; then
+                first_letter=("${letter_O[@]}")
+            elif [ "$1" == "X" ]; then
+                first_letter=("${letter_X[@]}")
+            else
+                first_letter=("${letter_empty[@]}")
+            fi
+
+            if [ "$2" == "O" ]; then
+                second_letter=("${letter_O[@]}")
+            elif [ "$2" == "X" ]; then
+                second_letter=("${letter_X[@]}")
+            else
+                second_letter=("${letter_empty[@]}")
+            fi
+
+            if [ "$3" == "O" ]; then
+                third_letter=("${letter_O[@]}")
+            elif [ "$3" == "X" ]; then
+                third_letter=("${letter_X[@]}")
+            else
+                third_letter=("${letter_empty[@]}")
+            fi
+
+            echo "$first_row"
+            echo "$second_row"
+
+            for i in {0..6}; do
+                if [ "$selected_id" -eq "-1" ]; then
+                    echo "  ${first_letter[$i]}  |  ${second_letter[$i]}  |  ${third_letter[$i]}"
+                elif [ "$selected_id" -eq "0" ]; then
+                    echo "* ${first_letter[$i]} *|  ${second_letter[$i]}  |  ${third_letter[$i]}"
+                elif [ "$selected_id" -eq "1" ]; then
+                    echo "  ${first_letter[$i]}  |* ${second_letter[$i]} *|  ${third_letter[$i]}"
+                elif [ "$selected_id" -eq "2" ]; then
+                    echo "  ${first_letter[$i]}  |  ${second_letter[$i]}  |* ${third_letter[$i]} *"
+                fi
+            done
+
+            echo "$second_row"
+            echo "$first_row"
+        }
+
+        if [ "$selected_field" -ge 0 ] && [ "$selected_field" -le 2 ]; then
+            print_row "${board[0]}" "${board[1]}" "${board[2]}" $((selected_field % 3))
+        else 
+            print_row "${board[0]}" "${board[1]}" "${board[2]}"
+        fi
+
+        print_row_separator
+
+        if [ "$selected_field" -ge 3 ] && [ "$selected_field" -le 5 ]; then
+            print_row "${board[3]}" "${board[4]}" "${board[5]}" $((selected_field % 3))
+        else 
+            print_row "${board[3]}" "${board[4]}" "${board[5]}"
+        fi
+
+        print_row_separator
+
+        if [ "$selected_field" -ge 6 ] && [ "$selected_field" -le 8 ]; then
+            print_row "${board[6]}" "${board[7]}" "${board[8]}" $((selected_field % 3))
+        else 
+            print_row "${board[6]}" "${board[7]}" "${board[8]}"
+        fi
+    }
+
+    handle_input() {
+        if [ "$winner" != "" ]; then
+            return
+        fi
+
+        case $1 in
+            'w')
+                if [ "$selected_field" -ge 3 ]; then
+                    selected_field=$((selected_field - 3))
+                fi
+                additional_info=""
+                ;;
+            's')
+                if [ "$selected_field" -le 5 ]; then
+                    selected_field=$((selected_field + 3))
+                fi
+                additional_info=""
+                ;;
+            'a')
+                if [ $((selected_field % 3)) -ne 0 ]; then
+                    selected_field=$((selected_field - 1))
+                fi
+                additional_info=""
+                ;;
+            'd')
+                if [ $((selected_field % 3)) -ne 2 ]; then
+                    selected_field=$((selected_field + 1))
+                fi
+                additional_info=""
+                ;;
+            'e')
+                handle_turn
+                ;;
+        esac
+    }
+
+    handle_turn() {
+        if [ "${board[$selected_field]}" == "_" ]; then
+            board[selected_field]=$player
+            if [ "$player" == "X" ]; then
+                player="O"
+            else
+                player="X"
+            fi
+            additional_info=""
+
+            check_winner
+        else
+            additional_info="Field already taken. Please select another one."
+        fi
+    }
+
+    game_loop() {
+        while true; do
+            clear
+            print_info
+            print_board
+            echo ""
+
+            echo -e "$additional_info"
+            read -rsn1 input
+            if [ "$input" == "q" ]; then
+                break
+            fi
+            handle_input "$input"
+
+        done 
+    }
+
+    game_loop
+}
+
+start_new_game() {
+    clear_game
+    start_game
+}
+
+clear_game() {
+    board=(
+        "_" "_" "_"
+        "_" "_" "_"
+        "_" "_" "_"
+    )
+    selected_field=4
+    player="X"
+    winner=""
+    additional_info=""
+}
+
+main_menu() {
+    while true; do
+        clear
+        echo "Welcome to Tic-Tac-Toe!"
+        echo ""
+        echo "Press the number of the option you want to select:"
+        echo "1. Start new game"
+        echo "2. Quit"
+
+        read -rsn1 input
+        case $input in
+            '1')
+                start_new_game
+                ;;
+            '2')
+                clear
+                tput cnorm
+                exit 0
+                ;;
+        esac
+    done
+}
+
+tput civis
+main_menu
