@@ -63,6 +63,7 @@ start_game() {
         echo "Press 'wsad' to select a field"
         echo "Press 'q' to quit"
         echo "Press 'e' to confirm"
+        echo "Press 'r' to save game"
         echo ""
         echo ""
         if [ "$winner" == "" ]; then
@@ -205,38 +206,45 @@ start_game() {
 
     handle_input() {
         if [ "$winner" != "" ]; then
-            return
+            case $1 in
+                'r')
+                    save_game
+                    ;;
+            esac
+        else 
+            case $1 in
+                'w')
+                    if [ "$selected_field" -ge 3 ]; then
+                        selected_field=$((selected_field - 3))
+                    fi
+                    additional_info=""
+                    ;;
+                's')
+                    if [ "$selected_field" -le 5 ]; then
+                        selected_field=$((selected_field + 3))
+                    fi
+                    additional_info=""
+                    ;;
+                'a')
+                    if [ $((selected_field % 3)) -ne 0 ]; then
+                        selected_field=$((selected_field - 1))
+                    fi
+                    additional_info=""
+                    ;;
+                'd')
+                    if [ $((selected_field % 3)) -ne 2 ]; then
+                        selected_field=$((selected_field + 1))
+                    fi
+                    additional_info=""
+                    ;;
+                'e')
+                    handle_turn
+                    ;;
+                'r')
+                    save_game
+                    ;;
+            esac
         fi
-
-        case $1 in
-            'w')
-                if [ "$selected_field" -ge 3 ]; then
-                    selected_field=$((selected_field - 3))
-                fi
-                additional_info=""
-                ;;
-            's')
-                if [ "$selected_field" -le 5 ]; then
-                    selected_field=$((selected_field + 3))
-                fi
-                additional_info=""
-                ;;
-            'a')
-                if [ $((selected_field % 3)) -ne 0 ]; then
-                    selected_field=$((selected_field - 1))
-                fi
-                additional_info=""
-                ;;
-            'd')
-                if [ $((selected_field % 3)) -ne 2 ]; then
-                    selected_field=$((selected_field + 1))
-                fi
-                additional_info=""
-                ;;
-            'e')
-                handle_turn
-                ;;
-        esac
     }
 
     handle_turn() {
@@ -254,6 +262,28 @@ start_game() {
             additional_info="Field already taken. Please select another one."
         fi
     }
+
+    save_game() {
+        if [ "$winner" != "" ]; then
+            if [ "$winner" == "X" ] || [ "$winner" == "O" ]; then
+                additional_info="Player $winner wins!\nPress 'q' to quit."
+                selected_field=-1
+            elif [ "$winner" == "DRAW" ]; then
+                additional_info="It's a draw!\nPress 'q' to quit."
+                selected_field=-1
+            fi
+            additional_info+="\n\nGame cannot be saved after it has ended."
+            return 1
+        fi
+
+        rm -f game.save
+        for i in {0..8}; do
+            echo "${board[$i]}" >> game.save
+        done
+        echo "$player" >> game.save
+        additional_info="Game saved!"
+        return 0
+    }   
 
     game_loop() {
         while true; do
@@ -292,21 +322,67 @@ clear_game() {
     additional_info=""
 }
 
+load_game() {
+    if [ -f game.save ]; then
+        i=0
+        board=()
+        while read -r line; do
+            board[i]=$line
+            i=$((i + 1))
+            if [ $i -eq 9 ]; then
+                break
+            fi
+        done < game.save
+        player=$(tail -n 1 game.save)
+        selected_field=4
+        winner=""
+        additional_info=""
+        check_winner
+        return 0
+    else
+        return 1
+    fi
+}
+
 main_menu() {
+    local save_info=""
     while true; do
         clear
         echo "Welcome to Tic-Tac-Toe!"
         echo ""
         echo "Press the number of the option you want to select:"
         echo "1. Start new game"
-        echo "2. Quit"
+        echo "2. Load saved game"
+        echo "3. Delete saved game"
+        echo "4. Quit"
+        echo ""
+        echo "$save_info"
 
         read -rsn1 input
         case $input in
             '1')
+                save_info=""
                 start_new_game
                 ;;
             '2')
+                load_game
+                if_save_exists=$?
+                if [ $if_save_exists -eq 0 ]; then
+                    save_info=""
+                    start_game
+                else
+                    save_info="No saved game found!"
+                fi
+                ;;
+            '3')
+                if [ -f game.save ]; then
+                    rm -f game.save
+                    save_info="Saved game deleted!"
+                else
+                    save_info="Cannot delete saved game. No saved game found!"
+                fi 
+                ;;
+            '4')
                 clear
                 tput cnorm
                 exit 0
