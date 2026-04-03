@@ -7,6 +7,7 @@ declare -a board=(
 )
 declare selected_field=4
 declare player="X"
+declare computer=""
 declare winner=""
 declare additional_info=""
 
@@ -261,43 +262,70 @@ start_game() {
         else
             additional_info="Field already taken. Please select another one."
         fi
-    }
-
-    save_game() {
-        if [ "$winner" != "" ]; then
-            if [ "$winner" == "X" ] || [ "$winner" == "O" ]; then
-                additional_info="Player $winner wins!\nPress 'q' to quit."
-                selected_field=-1
-            elif [ "$winner" == "DRAW" ]; then
-                additional_info="It's a draw!\nPress 'q' to quit."
-                selected_field=-1
-            fi
-            additional_info+="\n\nGame cannot be saved after it has ended."
-            return 1
-        fi
-
-        rm -f game.save
-        for i in {0..8}; do
-            echo "${board[$i]}" >> game.save
-        done
-        echo "$player" >> game.save
-        additional_info="Game saved!"
-        return 0
     }   
+
+    handle_computer_move() {
+        echo -n "Computer is thinking"
+        sleep 0.5
+        echo -n "."
+        sleep 0.5
+        echo -n "."
+        sleep 0.5
+        echo "."
+        sleep 0.5
+
+        local -a empty_fields=()
+        for i in {0..8}; do
+            if [ "${board[$i]}" == "_" ]; then
+                empty_fields+=("$i")
+            fi
+        done
+
+        local random_index=$((RANDOM % ${#empty_fields[@]}))
+        local random_field=${empty_fields[$random_index]}
+        board[random_field]="$computer"
+
+        if [ "$player" == "X" ]; then
+            player="O"
+        else
+            player="X"
+        fi
+        additional_info=""
+        check_winner
+    }
 
     game_loop() {
         while true; do
+            while read -r -t 0.001 -n 10000 _; do :; done   # cleaning input buffer
+
+            local previous_selected_field=$selected_field
+            if [ "$player" == "$computer" ]; then
+                selected_field=-1
+            fi
+
             clear
             print_info
             print_board
             echo ""
 
-            echo -e "$additional_info"
-            read -rsn1 input
-            if [ "$input" == "q" ]; then
-                break
+            if [ "$player" == "$computer" ] && [ "$winner" == "" ]; then
+                stty -echo
+                handle_computer_move
+                stty sane
+
+                if [ "$winner" != "" ]; then
+                    selected_field=-1
+                else
+                    selected_field=$previous_selected_field
+                fi
+            else 
+                echo -e "$additional_info"
+                read -rsn1 input
+                if [ "$input" == "q" ]; then
+                    break
+                fi
+                handle_input "$input"
             fi
-            handle_input "$input"
 
         done 
     }
@@ -307,6 +335,9 @@ start_game() {
 
 start_new_game() {
     clear_game
+    if [ "$#" -eq 1 ]; then
+        computer="$1" 
+    fi
     start_game
 }
 
@@ -318,8 +349,32 @@ clear_game() {
     )
     selected_field=4
     player="X"
+    computer=""
     winner=""
     additional_info=""
+}
+
+save_game() {
+    if [ "$winner" != "" ]; then
+        if [ "$winner" == "X" ] || [ "$winner" == "O" ]; then
+            additional_info="Player $winner wins!\nPress 'q' to quit."
+            selected_field=-1
+        elif [ "$winner" == "DRAW" ]; then
+            additional_info="It's a draw!\nPress 'q' to quit."
+            selected_field=-1
+        fi
+        additional_info+="\n\nGame cannot be saved after it has ended."
+        return 1
+    fi
+
+    rm -f game.save
+    for i in {0..8}; do
+        echo "${board[$i]}" >> game.save
+    done
+    echo "$player" >> game.save
+    echo "$computer" >> game.save
+    additional_info="Game saved!"
+    return 0
 }
 
 load_game() {
@@ -333,7 +388,8 @@ load_game() {
                 break
             fi
         done < game.save
-        player=$(tail -n 1 game.save)
+        player=$(tail -n 2 game.save | head -n 1)
+        computer=$(tail -n 1 game.save)
         selected_field=4
         winner=""
         additional_info=""
@@ -344,6 +400,33 @@ load_game() {
     fi
 }
 
+computer_menu() {
+    while true; do
+        clear 
+        echo "Choose the player:"
+        echo "1. Player X (first move)"
+        echo "2. Player O (second move)"
+        echo ""
+
+        read -rsn1 input
+        local game_started=0
+        case $input in
+            '1')
+                game_started=1
+                start_new_game "O"
+                ;;
+            '2')
+                game_started=1
+                start_new_game "X"
+                ;;
+        esac
+
+        if [ $game_started -eq 1 ]; then
+            break
+        fi
+    done
+}
+
 main_menu() {
     local save_info=""
     while true; do
@@ -352,9 +435,10 @@ main_menu() {
         echo ""
         echo "Press the number of the option you want to select:"
         echo "1. Start new game"
-        echo "2. Load saved game"
-        echo "3. Delete saved game"
-        echo "4. Quit"
+        echo "2. Start new game (with computer)"
+        echo "3. Load saved game"
+        echo "4. Delete saved game"
+        echo "5. Quit"
         echo ""
         echo "$save_info"
 
@@ -365,6 +449,10 @@ main_menu() {
                 start_new_game
                 ;;
             '2')
+                save_info=""
+                computer_menu
+                ;;
+            '3')
                 load_game
                 if_save_exists=$?
                 if [ $if_save_exists -eq 0 ]; then
@@ -374,7 +462,7 @@ main_menu() {
                     save_info="No saved game found!"
                 fi
                 ;;
-            '3')
+            '4')
                 if [ -f game.save ]; then
                     rm -f game.save
                     save_info="Saved game deleted!"
@@ -382,7 +470,7 @@ main_menu() {
                     save_info="Cannot delete saved game. No saved game found!"
                 fi 
                 ;;
-            '4')
+            '5')
                 clear
                 tput cnorm
                 exit 0
