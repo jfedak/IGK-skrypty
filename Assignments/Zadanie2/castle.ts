@@ -10,6 +10,8 @@ player.onChat("castle", function() {
     makeStairs(CASTLE_SIZE, CASTLE_HEIGHT)
     makeWindows()
     makeYard()
+    makeMoat()
+    makeBridge()
     player.say("castle is finished")
 })
 
@@ -165,4 +167,35 @@ function makeYard() {
         let [x, z] = pillar
         blocks.fill(pillarBlock, pos(x, 2, z), pos(x, 4, z))
     }
+
+    player.say("yard created")
+}
+
+function makeMoat() {
+    builder.teleportTo(pos(-22, -1, 22))
+    builder.face(CompassDirection.North)
+
+    for (let i = 0; i < 4; i++) {
+        builder.mark()
+        builder.move(SixDirection.Forward, 44)
+        builder.setOrigin()
+        builder.move(SixDirection.Right, 6)
+        builder.move(SixDirection.Down, 5)
+        builder.fill(Block.Water)
+        builder.teleportToOrigin()
+        builder.turn(TurnDirection.Right)
+    }
+
+    player.say("moat created")
+}
+
+function makeBridge() {
+    blocks.fill(Block.PlanksOak, pos(-2, 0, 16), pos(2, 0, 23))
+    blocks.fill(Block.OakWoodSlab, pos(-2, 0, 24), pos(2, 0, 24))
+    blocks.fill(Block.OakFence, pos(-2, 1, 16), pos(-2, 1, 25))
+    blocks.fill(Block.OakFence, pos(2, 1, 16), pos(2, 1, 25))
+    blocks.fill(Block.OakFence, pos(-2, 0, 25), pos(-2, 0, 26))
+    blocks.fill(Block.OakFence, pos(2, 0, 25), pos(2, 0, 26))
+
+    player.say("bridge created")
 }
