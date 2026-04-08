@@ -7,11 +7,13 @@ player.onChat("castle", function() {
     makeCeiling(CASTLE_SIZE, CORRIDOR_WIDTH, CASTLE_HEIGHT)
     makeWalls(CASTLE_SIZE, CASTLE_HEIGHT, false)
     makeWalls(CASTLE_SIZE + CORRIDOR_WIDTH, CASTLE_HEIGHT, true)
-    makeStairs(CASTLE_SIZE, CASTLE_HEIGHT)
     makeWindows()
     makeYard()
     makeMoat()
     makeBridge()
+    makeGate()
+    makeAllTowers()
+    makeRailing()
     player.say("castle is finished")
 })
 
@@ -41,7 +43,24 @@ function makeWalls(castleSize: number, castleHeight: number, putCobble: boolean)
         }
         blocks.fill(startBlock, pos(a, 0, b), pos(c, 0, d))
         blocks.fill(Block.StoneBricks, pos(a, 1, b), pos(c, castleHeight-1, d))
-        blocks.fill(Block.CobblestoneWall, pos(a, castleHeight, b), pos(c, castleHeight, d))
+    }
+}
+
+function makeRailing() {
+    builder.teleportTo(pos(-10, 8, 9))
+    builder.face(NORTH)
+    for (let i = 0; i < 4; i++) {
+        builder.setOrigin()
+        for (let j = 0; j < 2; j++) {
+            builder.mark()
+            builder.move(FORWARD, 18)
+            builder.fill(Block.CobblestoneWall)
+            builder.teleportToOrigin()
+            builder.shift(0, 0, 5)
+        }
+        builder.teleportToOrigin()
+        builder.shift(19, 0, -1)
+        builder.turn(RIGHT_TURN)
     }
 }
 
@@ -61,18 +80,6 @@ function makeCeiling(floorSize: number, corridorWidth:number, castleHeight: numb
     blocks.fill(Block.Air,
         pos(-floorSize, castleHeight - 1, -floorSize),
         pos(floorSize, castleHeight - 1, floorSize))
-}
-
-function makeStairs(castleSize: number, castleHeight: number) {
-    let x = castleSize - 1, y = castleSize - 1, h = castleHeight - 1
-    let stair = blocks.blockWithData(Block.StoneBrickStairs, 2)
-
-    blocks.place(Block.Air, pos(x, h+1, y+1))
-    while(h >= 0) {
-        blocks.place(stair, pos(x, h, y))
-        y = y-1
-        h = h-1
-    }
 }
 
 function makeWindows() {
@@ -198,4 +205,167 @@ function makeBridge() {
     blocks.fill(Block.OakFence, pos(2, 0, 25), pos(2, 0, 26))
 
     player.say("bridge created")
+}
+
+function makeGate() {
+    blocks.fill(Block.Air, pos(-2, 0, 15), pos(2, 2, 15))
+    blocks.fill(Block.OakFence, pos(-2, 3, 15), pos(2, 5, 15))
+    blocks.fill(Block.OakWoodSlab, pos(-2, 0, 15), pos(2, 0, 15))
+    blocks.place(Block.StoneBricks, pos(-2, 5, 15))
+    blocks.place(Block.StoneBricks, pos(2, 5, 15))
+
+    for (let i = 2; i >= 0; i -= 2) {
+        blocks.fill(Block.Cobblestone, pos(-2, 1, 16-i), pos(2, 6, 16-i))
+        blocks.fill(Block.Air, pos(-1, 1, 16-i), pos(1, 4, 16-i))
+        blocks.place(Block.Air, pos(-2, 6, 16 - i))
+        blocks.place(Block.Air, pos(2, 6, 16 - i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 0), pos(-2, 5, 16 - i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 0), pos(-1, 6, 16-i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 1), pos(2, 5, 16 - i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 1), pos(1, 6, 16 - i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 5), pos(-1, 4, 16 - i))
+        blocks.place(blocks.blockWithData(Block.CobblestoneStairs, 4), pos(1, 4, 16 - i))
+    }
+
+    blocks.place(Block.Cobblestone, pos(-2, 0, 14))
+    blocks.place(Block.Cobblestone, pos(2, 0, 14))
+
+    player.say("gate created")
+}
+
+function makeTower() {
+    function makeDoors(a: number, b: number) {
+        builder.mark()
+        builder.shift(1, 1, 0)
+        builder.fill(AIR)
+        builder.shift(-1, 1, 0)
+        builder.place(blocks.blockWithData(STONE_BRICK_STAIRS, a))
+        builder.shift(1, 0, 0)
+        builder.place(blocks.blockWithData(STONE_BRICK_STAIRS, b))
+        builder.shift(-1, -2, 0)
+    }
+
+    builder.startStructure()
+    for(let i = 0; i < 4; i++) {
+        builder.mark()
+        builder.move(FORWARD, 5)
+        builder.setOrigin()
+        builder.move(UP, 10)
+        builder.fill(Block.StoneBricks)
+        builder.teleportToOrigin()
+        builder.turn(LEFT_TURN)
+    }
+
+    builder.setOrigin()
+    builder.turn(LEFT_TURN)
+    builder.move(FORWARD, 2)
+    makeDoors(4, 5)
+    builder.shift(3, 0, -2)
+    builder.turn(RIGHT_TURN)
+    makeDoors(6, 7)
+
+    builder.teleportToOrigin()
+    builder.face(NORTH)
+    builder.shift(1, 0, 1)
+    builder.setOrigin()
+    builder.place(Block.StoneBricksSlab)
+
+    let up = 1
+    for (let x = 0; x < 7; x++) {
+        for(let y = 0; y < 3; y++) {
+            builder.move(FORWARD, 1)
+            builder.place(blocks.blockWithData(Block.StoneBricksSlab, up * 8))
+            up += 1
+            if (up == 2) {
+                builder.move(UP, 1)
+                up = 0
+            }
+        }
+        builder.turn(LEFT_TURN)
+    }
+
+    builder.teleportToOrigin()
+    builder.face(NORTH)
+
+    builder.move(UP, 10)
+    builder.setOrigin()
+    builder.mark()
+    builder.shift(3, 0, 2)
+    builder.fill(blocks.blockWithData(Block.StoneBricksSlab, 8))
+    builder.mark()
+    builder.move(RIGHT, 1)
+    builder.fill(Block.Air)
+
+    builder.teleportToOrigin()
+    let innerWallRules = [
+        [1, 0], [0 , -2], [2, 0], [0, 4], [-3, 0]
+    ]
+
+    builder.shift(1, 1, 2)
+    for (let dir of innerWallRules) {
+        let [forward, left] = dir
+        builder.mark()
+        builder.shift(forward, 0, left)
+        builder.fill(blocks.blockWithData(Block.CobblestoneWall, 7))
+    }
+
+    builder.teleportToOrigin()
+    let originPosition = builder.position()
+    builder.shift(-3, 0, -3)
+
+    for (let i = 0; i < 4; i++) {
+        builder.mark()
+        builder.move(SixDirection.Forward, 9)
+        builder.setOrigin()
+        builder.move(SixDirection.Left, 2)
+        builder.fill(Block.StoneBricks)
+        builder.teleportToOrigin()
+        builder.turn(TurnDirection.Left)
+    }
+
+    builder.move(SixDirection.Up, 1)
+    for (let i = 0; i < 4; i++) {
+        builder.mark()
+        builder.move(SixDirection.Forward, 9)
+        builder.fill(blocks.blockWithData(Block.CobblestoneWall, 7))
+        builder.turn(TurnDirection.Left)
+    }
+
+    builder.teleportTo(originPosition)
+    builder.shift(-3, -1, -3)
+
+    let stairsOrientation = [ 5, 6, 4, 7 ]
+    for (let i = 0; i < 4; i++) {
+        builder.mark()
+        builder.setOrigin()
+        builder.move(SixDirection.Forward, 9)
+        builder.fill(blocks.blockWithData(STONE_BRICK_STAIRS, stairsOrientation[i]))
+        builder.teleportToOrigin()
+        builder.shift(1, -1, 1)
+        builder.mark()
+        builder.move(SixDirection.Forward, 7)
+        builder.fill(blocks.blockWithData(STONE_BRICK_STAIRS, stairsOrientation[i]))
+        builder.teleportToOrigin()
+        builder.move(SixDirection.Forward, 9)
+        builder.turn(LEFT_TURN)
+    }
+
+    builder.saveStructure("tower")
+}
+
+function makeAllTowers() {
+    builder.teleportTo(pos(-10, 8, 15))
+    builder.face(NORTH)
+    builder.pushState()
+    makeTower()
+    builder.popState()
+    builder.shift(7, 0, 7)
+
+    for (let i = 0; i < 4; i++) {
+        builder.loadStructure("tower", (i + 2) % 4);
+        builder.move(FORWARD, 25);
+        builder.turn(RIGHT_TURN);
+    }
+
+    player.say("towers created")
 }
