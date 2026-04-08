@@ -3,6 +3,7 @@ const CASTLE_SIZE = 10
 const CASTLE_HEIGHT = 8
 
 player.onChat("castle", function() {
+    player.say("building castle...")
     makeFloor(CASTLE_SIZE + CORRIDOR_WIDTH)
     makeCeiling(CASTLE_SIZE, CORRIDOR_WIDTH, CASTLE_HEIGHT)
     makeWalls(CASTLE_SIZE, CASTLE_HEIGHT, false)
@@ -14,6 +15,7 @@ player.onChat("castle", function() {
     makeGate()
     makeAllTowers()
     makeRailing()
+    makeStairs()
     player.say("castle is finished")
 })
 
@@ -174,8 +176,6 @@ function makeYard() {
         let [x, z] = pillar
         blocks.fill(pillarBlock, pos(x, 2, z), pos(x, 4, z))
     }
-
-    player.say("yard created")
 }
 
 function makeMoat() {
@@ -192,8 +192,6 @@ function makeMoat() {
         builder.teleportToOrigin()
         builder.turn(TurnDirection.Right)
     }
-
-    player.say("moat created")
 }
 
 function makeBridge() {
@@ -203,8 +201,6 @@ function makeBridge() {
     blocks.fill(Block.OakFence, pos(2, 1, 16), pos(2, 1, 25))
     blocks.fill(Block.OakFence, pos(-2, 0, 25), pos(-2, 0, 26))
     blocks.fill(Block.OakFence, pos(2, 0, 25), pos(2, 0, 26))
-
-    player.say("bridge created")
 }
 
 function makeGate() {
@@ -229,8 +225,6 @@ function makeGate() {
 
     blocks.place(Block.Cobblestone, pos(-2, 0, 14))
     blocks.place(Block.Cobblestone, pos(2, 0, 14))
-
-    player.say("gate created")
 }
 
 function makeTower() {
@@ -366,6 +360,43 @@ function makeAllTowers() {
         builder.move(FORWARD, 25);
         builder.turn(RIGHT_TURN);
     }
+}
 
-    player.say("towers created")
+function makeStairs() {
+    blocks.fill(Block.StoneBricks, pos(-3, 0, -10), pos(3, 4, -10))
+    blocks.fill(Block.Air, pos(-1, 4, -10), pos(1, 4, -10))
+    blocks.place(blocks.blockWithData(Block.CobblestoneWall, 7), pos(0, 4, -10))
+
+    blocks.place(Block.StoneBricks, pos(-4, 4, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 4), pos(-3, 2, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 4), pos(-4, 3, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 4), pos(-5, 4, -10))
+    blocks.place(Block.StoneBricks, pos(4, 4, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 5), pos(3, 2, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 5), pos(4, 3, -10))
+    blocks.place(blocks.blockWithData(Block.StoneBrickStairs, 5), pos(5, 4, -10))
+
+    blocks.fill(Block.StoneBricks, pos(-2, 0, -5), pos(2, 2, -9))
+    blocks.fill(Block.StoneBricks, pos(-2, 0, -4), pos(2, 0, -4))
+
+    for(let i = 0; i < 3; i++) {
+        blocks.fill(blocks.blockWithData(Block.StoneBrickStairs, 3), pos(-2, 0+i, -3-i), pos(2, 0+i, -3-i))
+    }
+
+    for (let i = 0; i < 5; i++) {
+        blocks.fill(blocks.blockWithData(Block.StoneBrickStairs, 1), pos(-3-i, 3 + i, -6), pos(-3-i, 3 + i, -9))
+        blocks.fill(blocks.blockWithData(Block.StoneBrickStairs, 4), pos(-3 - i, 2 + i, -6), pos(-3 - i, 2 + i, -9))
+        blocks.fill(blocks.blockWithData(Block.StoneBrickStairs, 0), pos(3 + i, 3 + i, -6), pos(3 + i, 3 + i, -9))
+        blocks.fill(blocks.blockWithData(Block.StoneBrickStairs, 5), pos(3 + i, 2 + i, -6), pos(3 + i, 2 + i, -9))
+    }
+
+    blocks.fill(Block.StoneBricks, pos(-8, 7, -6), pos(-9, 7, -9))
+    blocks.place(Block.Air, pos(-8, 8, -10))
+    blocks.fill(Block.Air, pos(-10, 8, -7), pos(-10, 8, -8))
+    blocks.fill(Block.CobblestoneWall, pos(-9, 8, -6), pos(-8, 8, -6))
+
+    blocks.fill(Block.StoneBricks, pos(8, 7, -6), pos(9, 7, -9))
+    blocks.place(Block.Air, pos(8, 8, -10))
+    blocks.fill(Block.Air, pos(10, 8, -7), pos(10, 8, -8))
+    blocks.fill(Block.CobblestoneWall, pos(9, 8, -6), pos(8, 8, -6))
 }
