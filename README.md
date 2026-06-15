@@ -32,13 +32,13 @@ Demo: [zadanie2.mp4](https://github.com/jfedak/IGK-skrypty/blob/master/Demos/zad
 
 ✅ 3.0 - Należy pobrać podstawowe dane o produktach (tytuł, cena), dowolna kategoria - [commit](https://github.com/jfedak/IGK-skrypty/commit/0dd79363cd0a9457f039db37eb9a8a9b9d898c78)
 
-✅ 3.5 - Należy pobrać podstawowe dane o produktach wg słów kluczowych
+✅ 3.5 - Należy pobrać podstawowe dane o produktach wg słów kluczowych - [commit](https://github.com/jfedak/IGK-skrypty/commit/a662db477d73ce5d450fe9aaddb9bd1ff94ff690)
 
-✅ 4.0 - Należy rozszerzyć dane o produktach o dane szczegółowe widoczne tylko na podstronie o produkcie
+✅ 4.0 - Należy rozszerzyć dane o produktach o dane szczegółowe widoczne tylko na podstronie o produkcie - [commit](https://github.com/jfedak/IGK-skrypty/commit/a662db477d73ce5d450fe9aaddb9bd1ff94ff690)
 
-✅ 4.5 - Należy zapisać linki do produktów
+✅ 4.5 - Należy zapisać linki do produktów - [commit](https://github.com/jfedak/IGK-skrypty/commit/a662db477d73ce5d450fe9aaddb9bd1ff94ff690)
 
-✅ 5.0 - Dane należy zapisać w bazie danych np. SQLite via Sequel
+✅ 5.0 - Dane należy zapisać w bazie danych np. SQLite via Sequel - [commit](https://github.com/jfedak/IGK-skrypty/commit/a662db477d73ce5d450fe9aaddb9bd1ff94ff690)
 
 Kod: [Zadanie 3](https://github.com/jfedak/IGK-skrypty/tree/master/Assignments/Zadanie3)
 
@@ -48,11 +48,11 @@ Demo: [zadanie3.mov](https://github.com/jfedak/IGK-skrypty/blob/master/Demos/zad
 
 ✅ 3.0 - Postawowa wersja dekstopowa z obsługą na klawiaturze - minimum 4 rodzaje klocków - [commit](https://github.com/jfedak/IGK-skrypty/commit/cccd3fd2feafdf69ede1a2607c5b1defd4499586)
 
-❌ 3.5 - Zapis i odczyt gier
+✅ 3.5 - Zapis i odczyt gier - [commit](https://github.com/jfedak/IGK-skrypty/commit/9ad4d36c0ae3fccd3e7430b84b344ba63381f48e)
 
-❌ 4.0 - Dodanie efektów dźwiękowych przy akcjach
+✅ 4.0 - Dodanie efektów dźwiękowych przy akcjach - [commit](https://github.com/jfedak/IGK-skrypty/commit/9ad4d36c0ae3fccd3e7430b84b344ba63381f48e)
 
-❌ 4.5 - Dodanie animacji przy zbijaniu klocków
+✅ 4.5 - Dodanie animacji przy zbijaniu klocków - [commit](https://github.com/jfedak/IGK-skrypty/commit/9ad4d36c0ae3fccd3e7430b84b344ba63381f48e)
 
 ❌ 5.0 - Wersja na iOS lub Android z implementacją touch zamiast klawiatury
 
