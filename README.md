@@ -64,13 +64,13 @@ Demo: [zadanie4.mov](https://github.com/jfedak/IGK-skrypty/blob/master/Demos/zad
 
 ✅ 3.0 - Czatbot z wytrenowaną umiejętnością (poprzez prompt) obsługi co najmniej 3 sposobów sformułowania intencji (powitanie, menu, zamówienie). - [commit](https://github.com/jfedak/IGK-skrypty/commit/dda53a2ca9cdcad712ee23a9a1f183ddcd712221)
 
-❌ 3.5 Informacje o godzinach otwarcia i pozycjach w menu powinny być pobierane z pliku konfiguracyjnego (JSON/YAML) i przekazywane do modelu.
+✅ 3.5 Informacje o godzinach otwarcia i pozycjach w menu powinny być pobierane z pliku konfiguracyjnego (JSON/YAML) i przekazywane do modelu. - [commit](https://github.com/jfedak/IGK-skrypty/commit/b3791d7d3ec63190389851943e7a63099ed0ebb0)
 
-❌ 4.0 Czatbot musi przetworzyć zamówienie i potwierdzić zakupione posiłki, a także obsłużyć dodatkowe prośby (np. alergie, modyfikacje dań). Dane o alergiach, składzie, daniach ładowy z api aplikacji webowej napisanej we Flasku.
+✅ 4.0 Czatbot musi przetworzyć zamówienie i potwierdzić zakupione posiłki, a także obsłużyć dodatkowe prośby (np. alergie, modyfikacje dań). Dane o alergiach, składzie, daniach ładowy z api aplikacji webowej napisanej we Flasku. - [commit](https://github.com/jfedak/IGK-skrypty/commit/73acd4d46f95fe8daa3ad32f830fa5035b9eab49)
 
-❌ 4.5 Czatbot musi potwierdzić, kiedy posiłek będzie dostępny do odbioru w restauracji (estymacja czasu na podstawie zamówienia).
+✅ 4.5 Czatbot musi potwierdzić, kiedy posiłek będzie dostępny do odbioru w restauracji (estymacja czasu na podstawie zamówienia). - [commit](https://github.com/jfedak/IGK-skrypty/commit/73acd4d46f95fe8daa3ad32f830fa5035b9eab49)
 
-❌ 5.0 Czatbot powinien zapytać o adres dostawy i potwierdzić go, zamiast opcji odbioru osobistego, weryfikując kompletność danych adresowych. Zapisać zamówienie przez wywołanie api aplikacji we Flasku. We Flasku zapisujemy dane zamówienia w bazie.
+✅ 5.0 Czatbot powinien zapytać o adres dostawy i potwierdzić go, zamiast opcji odbioru osobistego, weryfikując kompletność danych adresowych. Zapisać zamówienie przez wywołanie api aplikacji we Flasku. We Flasku zapisujemy dane zamówienia w bazie. - [commit](https://github.com/jfedak/IGK-skrypty/commit/73acd4d46f95fe8daa3ad32f830fa5035b9eab49)
 
 Kod: [Zadanie 5](https://github.com/jfedak/IGK-skrypty/tree/master/Assignments/Zadanie5)
 
