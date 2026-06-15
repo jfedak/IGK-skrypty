@@ -32,13 +32,13 @@ Demo: [zadanie2.mp4](https://github.com/jfedak/IGK-skrypty/blob/master/Demos/zad
 
 ✅ 3.0 - Należy pobrać podstawowe dane o produktach (tytuł, cena), dowolna kategoria - [commit](https://github.com/jfedak/IGK-skrypty/commit/0dd79363cd0a9457f039db37eb9a8a9b9d898c78)
 
-❌ 3.5 - Należy pobrać podstawowe dane o produktach wg słów kluczowych
+✅ 3.5 - Należy pobrać podstawowe dane o produktach wg słów kluczowych
 
-❌ 4.0 - Należy rozszerzyć dane o produktach o dane szczegółowe widoczne tylko na podstronie o produkcie
+✅ 4.0 - Należy rozszerzyć dane o produktach o dane szczegółowe widoczne tylko na podstronie o produkcie
 
-❌ 4.5 - Należy zapisać linki do produktów
+✅ 4.5 - Należy zapisać linki do produktów
 
-❌ 5.0 - Dane należy zapisać w bazie danych np. SQLite via Sequel
+✅ 5.0 - Dane należy zapisać w bazie danych np. SQLite via Sequel
 
 Kod: [Zadanie 3](https://github.com/jfedak/IGK-skrypty/tree/master/Assignments/Zadanie3)
 
