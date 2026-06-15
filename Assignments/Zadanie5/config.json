@@ -1,0 +1,27 @@
+{
+  "restaurant_name": "Reastauracja pod chmurką",
+  "opening_hours": {
+    "monday_friday": "10:00 - 22:00",
+    "saturday_sunday": "11:00 - 24:00"
+  },
+  "menu": [
+    {
+      "name": "Pizza Margherita",
+      "price": 30.0,
+      "ingredients": ["ciasto drożdżowe", "sos pomidorowy", "ser mozzarella", "bazylia"],
+      "allergens": ["gluten", "laktoza"]
+    },
+    {
+      "name": "Burger Wołowy",
+      "price": 35.0,
+      "ingredients": ["bułka", "kotlet z wołowiny 200g", "ser cheddar", "sos holenderski", "sałata", "pomidor", "ogórek"],
+      "allergens": ["gluten", "laktoza", "gorczyca"]
+    },
+    {
+      "name": "Sałatka Cezar",
+      "price": 25.0,
+      "ingredients": ["sałata rzymska", "grillowana pierś z kurczaka", "grzanki", "ser parmezan", "sos cezar"],
+      "allergens": ["gluten", "laktoza", "jaja", "ryby"]
+    }
+  ]
+}
