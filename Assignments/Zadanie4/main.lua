@@ -1,9 +1,17 @@
 local cols, rows = 10, 20
 local blockSize = 30
-local grid = {}
-local dropTimer = 0
 local dropInterval = 0.5
 
+local linesToClear = {}
+local clearAnimationTimer = 0
+local clearAnimationStep = 0
+local clearAnimationStepDuration = 0.05
+
+local gameState = "menu"
+
+-- values that need to be saved
+local grid = {}
+local dropTimer = 0
 local blockX, blockY
 local currentBlock
 
@@ -20,6 +28,8 @@ local colors = {
     {1, 0, 1},
     {1, 0.5, 0}
 }
+
+local sounds = {}
 
 function rotate(block)
     local newBlock = {}
@@ -38,6 +48,12 @@ function love.load()
     love.window.setMode(cols * blockSize, rows * blockSize)
     love.window.setTitle("Tetris")
     love.keyboard.setKeyRepeat(true)
+
+    sounds.move = love.audio.newSource("sounds/move.wav", "static")
+    sounds.rotate = love.audio.newSource("sounds/rotate.wav", "static")
+    sounds.lock = love.audio.newSource("sounds/lock.wav", "static")
+    sounds.clear = love.audio.newSource("sounds/clear.wav", "static")
+    sounds.gameover = love.audio.newSource("sounds/gameover.wav", "static")
     
     for x = 1, rows do
         grid[x] = {}
@@ -48,6 +64,20 @@ function love.load()
     spawnBlock()
 end
 
+function startNewGame()
+    for x = 1, rows do
+        grid[x] = {}
+        for y = 1, cols do
+            grid[x][y] = 0
+        end
+    end
+    
+    dropTimer = 0
+    spawnBlock()
+    
+    gameState = "playing"
+end
+
 function spawnBlock()
     local blockIndex = love.math.random(1, #blocks)
     currentBlock = blocks[blockIndex]
@@ -55,7 +85,9 @@ function spawnBlock()
     blockY = 1
 
     if checkCollision(currentBlock, blockX, blockY) then
-        love.event.quit()
+        gameState = "gameover"
+        currentBlock = nil
+        sounds.gameover:play()  
     end
 end
 
@@ -80,13 +112,16 @@ function lockBlock()
             end
         end
     end
+
+    currentBlock = nil
     clearLines()
-    spawnBlock()
 end
 
 function clearLines()
+    linesToClear = {}
     local y = rows
-    while y > 0 do
+
+    for y = 1, rows do
         local isFull = true
         for x = 1, cols do
             if grid[y][x] == 0 then
@@ -94,51 +129,143 @@ function clearLines()
                 break
             end
         end
-        
         if isFull then
-            table.remove(grid, y)
-            local newRow = {}
-            for x = 1, cols do newRow[x] = 0 end
-            table.insert(grid, 1, newRow)
-        else
-            y = y - 1
+            table.insert(linesToClear, y)
         end
+    end
+
+    if #linesToClear > 0 then
+        gameState = "clearing"
+        clearAnimationTimer = 0
+        clearAnimationStep = 1
+        sounds.clear:play()
+        
+        local leftCol = math.floor(cols / 2) - clearAnimationStep + 1
+        local rightCol = math.floor(cols / 2) + clearAnimationStep
+        
+        for _, y in ipairs(linesToClear) do
+            grid[y][leftCol] = 0
+            grid[y][rightCol] = 0
+        end
+    else
+        spawnBlock()
     end
 end
 
+function removeClearedLines()
+    for i = #linesToClear, 1, -1 do
+        local y = linesToClear[i]
+        table.remove(grid, y)
+    end
+    
+    for i = 1, #linesToClear do
+        local newRow = {}
+        for x = 1, cols do newRow[x] = 0 end
+        table.insert(grid, 1, newRow)
+    end
+    
+    linesToClear = {}
+    spawnBlock()
+    gameState = "playing"
+end
+
+
+-- updating functions
+
 function love.update(dt)
-    dropTimer = dropTimer + dt
-    if dropTimer >= dropInterval then
-        dropTimer = 0
-        if not checkCollision(currentBlock, blockX, blockY + 1) then
-            blockY = blockY + 1
-        else
-            lockBlock()
+    if gameState == "playing" then
+        dropTimer = dropTimer + dt
+        if dropTimer >= dropInterval then
+            dropTimer = 0
+            if not checkCollision(currentBlock, blockX, blockY + 1) then
+                blockY = blockY + 1
+            else
+                sounds.lock:play()
+                lockBlock()
+            end
+        end
+
+    elseif gameState == "clearing" then
+        clearAnimationTimer = clearAnimationTimer + dt
+        
+        if clearAnimationTimer >= clearAnimationStepDuration then
+            clearAnimationTimer = 0
+            clearAnimationStep = clearAnimationStep + 1
+            
+            if clearAnimationStep > cols / 2 then
+                removeClearedLines()
+            else
+                local leftCol = math.floor(cols / 2) - clearAnimationStep + 1
+                local rightCol = math.floor(cols / 2) + clearAnimationStep
+                
+                for _, y in ipairs(linesToClear) do
+                    grid[y][leftCol] = 0
+                    grid[y][rightCol] = 0
+                end
+            end
         end
     end
 end
 
 function love.keypressed(key)
-    if key == "left" then
-        if not checkCollision(currentBlock, blockX - 1, blockY) then blockX = blockX - 1 end
-    elseif key == "right" then
-        if not checkCollision(currentBlock, blockX + 1, blockY) then blockX = blockX + 1 end
-    elseif key == "down" then
-        if not checkCollision(currentBlock, blockX, blockY + 1) then blockY = blockY + 1 end
-    elseif key == "up" then
-        local rotated = rotate(currentBlock)
-        if not checkCollision(rotated, blockX, blockY) then
-            currentBlock = rotated
+    if gameState == "menu" then
+        if key == "1" then
+            startNewGame()
+        elseif key == "2" then
+            if loadGame() then
+                gameState = "playing"
+            end
+        end
+        
+    elseif gameState == "playing" then
+        if key == "left" then
+            if not checkCollision(currentBlock, blockX - 1, blockY) then 
+                blockX = blockX - 1 
+                sounds.move:play()
+            end
+        elseif key == "right" then
+            if not checkCollision(currentBlock, blockX + 1, blockY) then 
+                blockX = blockX + 1 
+                sounds.move:play()
+            end
+        elseif key == "down" then
+            if not checkCollision(currentBlock, blockX, blockY + 1) then 
+                blockY = blockY + 1 
+                sounds.move:play()
+            end
+        elseif key == "up" then
+            local rotated = rotate(currentBlock)
+            if not checkCollision(rotated, blockX, blockY) then
+                currentBlock = rotated
+                sounds.rotate:play()
+            end
+        end
+        
+        if key == "s" then
+            saveGame()
+            gameState = "menu"
+        end
+        
+    elseif gameState == "gameover" then
+        if key == "return" then
+            gameState = "menu"
         end
     end
 end
+
+
+
+
+
+-- rendering functions
 
 function drawBlock(x, y, colorIndex)
     love.graphics.setColor(colors[colorIndex])
     love.graphics.rectangle("fill", (x - 1) * blockSize, (y - 1) * blockSize, blockSize - 1, blockSize - 1)
 end
 
-function love.draw()
+
+function drawGame()
     for y = 1, rows do
         for x = 1, cols do
             if grid[y][x] > 0 then
@@ -155,5 +282,94 @@ function love.draw()
                 end
             end
         end
+    end
+end
+
+function love.draw()
+    if gameState == "menu" then
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("TETRIS", 120, 200)
+        love.graphics.print("Press [1] - New Game", 70, 250)
+        love.graphics.print("Press [2] - Load Game", 70, 280)
+        
+    elseif gameState == "playing" then
+        drawGame()
+
+    elseif gameState == "clearing" then
+        drawGame()
+        
+    elseif gameState == "gameover" then
+        drawGame() 
+        love.graphics.setColor(0, 0, 0, 0.85)
+        love.graphics.rectangle("fill", 0, 0, cols * blockSize, rows * blockSize)
+
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.print("GAME OVER", 110, 250)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("Press [Enter] to return to menu", 40, 300)
+    end
+end
+
+
+
+-- saving game functions
+
+-- helper function to convert a table to a string representation
+function tableToString(table)
+    local result = "{"
+    for k, v in pairs(table) do
+        if type(k) == "number" then
+            result = result .. "[" .. k .. "]="
+        else
+            result = result .. k .. "="
+        end
+        
+        if type(v) == "table" then
+            result = result .. tableToString(v) .. ","
+        elseif type(v) == "number" then
+            result = result .. v .. ","
+        elseif type(v) == "string" then
+            result = result .. string.format("%q", v) .. ","
+        elseif type(v) == "boolean" then
+            result = result .. tostring(v) .. ","
+        end
+    end
+    return result .. "}"
+end
+
+function saveGame()
+    local gameState = {
+        grid = grid,
+        currentBlock = currentBlock,
+        blockX = blockX,
+        blockY = blockY,
+        dropTimer = dropTimer
+    }
+    
+    local gameData = "return " .. tableToString(gameState)
+    success, message = love.filesystem.write("tetris_save.lua", gameData)
+    
+    if success then
+        print("Game saved successfully!")
+    else
+        print("Error saving game: " .. tostring(message))
+    end
+end
+
+function loadGame()
+    if love.filesystem.getInfo("tetris_save.lua") then
+        local gameState = love.filesystem.load("tetris_save.lua")()
+
+        grid = gameState.grid
+        currentBlock = gameState.currentBlock
+        blockX = gameState.blockX
+        blockY = gameState.blockY
+        dropTimer = gameState.dropTimer
+        
+        print("Game loaded successfully!")
+        return true
+    else
+        print("No save file to load.")
+        return false
     end
 end
